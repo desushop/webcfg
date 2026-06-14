@@ -21,7 +21,6 @@ fn main() {
 }
 
 fn dependencies(sh: &mut xshell::Shell) {
-    cmd!(sh, "cargo install --locked cargo-nextest --color always").run().unwrap();
 }
 
 fn run_build(sh: &mut xshell::Shell) {
@@ -37,7 +36,7 @@ fn run_move(sh: &mut xshell::Shell) {
 
 fn run_test(sh: &mut xshell::Shell, verbose: bool) {
     match verbose {
-        false => cmd!(sh, "cargo nextest run -r --nff --workspace --color always --cargo-quiet --cargo-quiet --cargo-message-format short --no-capture --show-progress bar").run().unwrap(),
+        false => cmd!(sh, "cargo test -p webcfg").run().unwrap(),
         true => cmd!(sh, "cargo nextest run -rv -j 1 --nff --workspace --color always --cargo-quiet --cargo-message-format human --show-progress bar").run().unwrap(),
     }
 }
