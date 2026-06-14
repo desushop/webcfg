@@ -1,6 +1,6 @@
 # webcfg
 
-![status](https://github.com/desushop/webcfg/actions/workflows/test.yml/badge.svg?branch=dev&event=issues)
+[![.github/workflows/test.yml](https://github.com/desushop/webcfg/actions/workflows/test.yml/badge.svg)](https://github.com/desushop/webcfg/actions/workflows/test.yml)
 ![activity](https://wakatime.com/badge/user/ebed9dd2-22e8-4e7d-9c76-83babf4cdf22/project/f1072c71-7f9b-4b01-b8f7-afe487e31f58.svg)
 
 ## goal
