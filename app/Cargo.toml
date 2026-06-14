@@ -9,6 +9,7 @@ axum = { version = "0.8.9", features = ["tokio", "json", "http2"]}
 camino = { version = "1.2.2", features = []}
 jsonwebtoken = { version = "10.4.0", features = []}
 openid = { version = "0.23.0", features = ["http2", "native-tls"]}
+reqwest = "0.13.4"
 scraper = { version = "0.27.0", features = ["default", "serde"]}
 serde = { version = "1.0.228", features = ["default", "derive"]}
 tokio = { version = "1.52.3", features = ["sync", "time", "net", "macros", "fs", "rt-multi-thread"]}

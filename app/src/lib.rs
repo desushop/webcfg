@@ -19,17 +19,23 @@
 
 use anyhow::Context;
 
-async fn serve<S>(socket: S, app: axum::Router) -> anyhow::Result<()>
-where S: tokio::net::ToSocketAddrs + std::fmt::Debug {
-    let listener = tokio::net::TcpListener::bind(&socket).await
-        .with_context(|| format!("failed to create socket from {socket:?}"))?;
-    axum::serve(listener, app).await
-        .with_context(|| "failed to start axum server")
-        .map(|_| ())
+fn serve<S>(socket: S, app: axum::Router) -> anyhow::Result<()>
+where for<'a> S: 'a + Send + Sync + tokio::net::ToSocketAddrs + std::fmt::Debug {
+    tokio::spawn(async move {
+        let listener = tokio::net::TcpListener::bind(&socket).await
+            .with_context(|| format!("failed to create socket from {socket:?}"))?;
+        axum::serve(listener, app).await
+            .with_context(|| "failed to start axum server")
+            .map(|_| ())
+    }); Ok(())
 }
 
-#[tokio::test]
 async fn test_serve() -> anyhow::Result<()> {
-    serve("::1", axum::Router::new()).await
-        .with_context(|| "failed to execute serve()")
+    let addr = "::1:35800";
+    serve(addr, axum::Router::new())
+        .with_context(|| "failed to execute serve()");
+    let req = reqwest::get(format!("http://{addr}")).await
+        .with_context(|| "failed to fetch request")?;
+
+    anyhow::ensure!(req.status() == 404, "axum server is not reachable"); Ok(())
 }
