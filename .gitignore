@@ -1,0 +1,9 @@
+﻿/.idea
+/.git
+/.output
+/.obsidian
+/target
+profile.json.gz
+.cz.toml
+cargo.lock
+Cargo.lock

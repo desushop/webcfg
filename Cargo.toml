@@ -1,0 +1,31 @@
+[workspace]
+resolver = "3"
+members = [
+    "xtask/",
+    "app",
+]
+
+[workspace.lints.clippy]
+assigning_clones = "warn"
+cast_lossless = "warn"
+excessive_nesting = "warn"
+too_many_lines = "warn"
+comparison_chain = "warn"
+create_dir = "warn"
+dbg_macro = "warn"
+doc_broken_link = "deny"
+doc_comment_double_space_linebreaks = "deny"
+elidable_lifetime_names = "warn"
+expect_used = "deny"
+format_collect = "warn"
+implicit_clone = "warn"
+ip_constant = "deny"
+large_types_passed_by_value = "warn"
+large_stack_arrays = "warn"
+todo = "warn"
+new_ret_no_self = "allow"
+unused_result_ok = "warn"
+cast_sign_loss = "deny"
+
+[workspace.lints.rust]
+missing_docs = "allow"

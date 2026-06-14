@@ -1,0 +1,6 @@
+[build]
+target-dir = ".output"
+build-dir = ".output"
+
+[alias]
+xtask = "run --package xtask --"
