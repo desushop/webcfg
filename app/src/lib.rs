@@ -19,6 +19,12 @@
 
 use anyhow::Context;
 
+static WORKING_DIR: std::sync::LazyLock<camino::Utf8PathBuf> = std::sync::LazyLock::new(|| {
+    let exe = std::env::current_exe().expect("ERR read working directory");
+    let utf = camino::Utf8PathBuf::from_path_buf(exe).expect("ERR convert utf8 path");
+    return utf.with_file_name("")
+});
+
 fn serve<S>(socket: S, app: axum::Router) -> anyhow::Result<()>
 where for<'a> S: 'a + Send + Sync + tokio::net::ToSocketAddrs + std::fmt::Debug {
     tokio::spawn(async move {
