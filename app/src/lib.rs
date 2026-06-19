@@ -30,6 +30,7 @@ where for<'a> S: 'a + Send + Sync + tokio::net::ToSocketAddrs + std::fmt::Debug 
     }); Ok(())
 }
 
+#[tokio::test]
 async fn test_serve() -> anyhow::Result<()> {
     let addr = "::1:35800";
     serve(addr, axum::Router::new())
