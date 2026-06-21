@@ -9,4 +9,4 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
       - run: cargo xtask dependencies
-      - run: cargo xtask test
+      - run: cargo xtask test 1
