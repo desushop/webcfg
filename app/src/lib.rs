@@ -17,39 +17,30 @@
 //! ## license
 //! © single license - AGPL-3.0 - maoperson@desushop
 
-use std::ops::Deref;
+pub use router::*;
 
+use std::ops::Deref;
 use anyhow::Context;
 
-static WORKING_DIR: std::sync::LazyLock<camino::Utf8PathBuf> = std::sync::LazyLock::new(|| {
+mod router;
+
+pub static WORKING_DIR: std::sync::LazyLock<camino::Utf8PathBuf> = std::sync::LazyLock::new(|| {
     let exe = std::env::current_exe().expect("ERR read working directory");
     let utf = camino::Utf8PathBuf::from_path_buf(exe).expect("ERR convert utf8 path");
     return utf.with_file_name("")
 });
 
 /// axum app state
-struct App {
+#[derive(Debug, Default)]
+pub struct App {
     error_bucket: Vec<anyhow::Error>
 }
 
-fn serve<S>(socket: S, app: axum::Router) -> anyhow::Result<()>
-where for<'a> S: 'a + Send + Sync + tokio::net::ToSocketAddrs + std::fmt::Debug {
-    tokio::spawn(async move {
-        let listener = tokio::net::TcpListener::bind(&socket).await
-            .with_context(|| format!("ERR create socket from {socket:?}"))?;
-        axum::serve(listener, app).await
-            .with_context(|| "ERR start axum server")
-            .map(|_| ())
-    }); Ok(())
-}
+pub trait WebcfgRunnable {
+    fn serve<S>(self, socket: S) -> anyhow::Result<()>
+    where for<'a> S: 'a + Send + Sync + tokio::net::ToSocketAddrs + std::fmt::Debug;
 
-#[tokio::test]
-async fn test_serve() -> anyhow::Result<()> {
-    let addr = "::1:35800";
-    serve(addr, axum::Router::new())
-        .with_context(|| "ERR execute serve()");
-    let req = reqwest::get(format!("http://{addr}")).await
-        .with_context(|| "ERR fetch request")?;
-
-    anyhow::ensure!(req.status() == 404, "axum server is not reachable"); Ok(())
+    /// loads html files from a target directory
+    type HtmlFile;
+    fn load_html<'a>(&mut self, target: impl AsRef<camino::Utf8Path>) -> anyhow::Result<&'a [Self::HtmlFile]>;
 }
