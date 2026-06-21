@@ -29,3 +29,4 @@ cast_sign_loss = "deny"
 
 [workspace.lints.rust]
 missing_docs = "allow"
+unused = "allow"
