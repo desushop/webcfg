@@ -17,6 +17,8 @@
 //! ## license
 //! © single license - AGPL-3.0 - maoperson@desushop
 
+use std::ops::Deref;
+
 use anyhow::Context;
 
 static WORKING_DIR: std::sync::LazyLock<camino::Utf8PathBuf> = std::sync::LazyLock::new(|| {
@@ -24,6 +26,11 @@ static WORKING_DIR: std::sync::LazyLock<camino::Utf8PathBuf> = std::sync::LazyLo
     let utf = camino::Utf8PathBuf::from_path_buf(exe).expect("ERR convert utf8 path");
     return utf.with_file_name("")
 });
+
+/// axum app state
+struct App {
+    error_bucket: Vec<anyhow::Error>
+}
 
 fn serve<S>(socket: S, app: axum::Router) -> anyhow::Result<()>
 where for<'a> S: 'a + Send + Sync + tokio::net::ToSocketAddrs + std::fmt::Debug {
