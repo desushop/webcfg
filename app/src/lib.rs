@@ -23,6 +23,7 @@ use std::ops::Deref;
 use anyhow::Context;
 
 mod router;
+mod test;
 
 pub static WORKING_DIR: std::sync::LazyLock<camino::Utf8PathBuf> = std::sync::LazyLock::new(|| {
     let exe = std::env::current_exe().expect("ERR read working directory");
@@ -36,8 +37,8 @@ pub struct App {
     error_bucket: Vec<anyhow::Error>
 }
 
-pub trait WebcfgRunnable {
-    fn serve<S>(self, socket: S) -> anyhow::Result<()>
+pub(crate) trait WebcfgRunnable {
+    async fn serve<S>(self, socket: S) -> anyhow::Result<()>
     where for<'a> S: 'a + Send + Sync + tokio::net::ToSocketAddrs + std::fmt::Debug;
 
     /// loads html files from a target directory
