@@ -19,7 +19,7 @@ async fn test_serve() -> anyhow::Result<()> {
 #[tokio::test]
 async fn test_load_html() -> anyhow::Result<()> {
     let mut router = axum::Router::new();
-    router.load_html(WORKING_DIR.deref().join("sites"))
-        .with_context(|| "ERR load html files");
+    let html = router.load_html(WORKING_DIR.deref().join("sites"))
+        .with_context(|| "ERR load html files")?;
     Ok(())
 }
