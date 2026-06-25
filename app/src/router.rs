@@ -39,3 +39,7 @@ impl crate::WebcfgRunnable for axum::Router {
         todo!()
     }
 }
+
+fn compile_html<H>(path: impl AsRef<camino::Utf8Path>) -> anyhow::Result<H> {
+    todo!() //TODO sanitize html
+}
