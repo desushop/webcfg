@@ -41,7 +41,7 @@ pub(crate) trait WebcfgRunnable {
     async fn serve<S>(self, socket: S) -> anyhow::Result<()>
     where for<'a> S: 'a + Send + Sync + tokio::net::ToSocketAddrs + std::fmt::Debug;
 
-    /// loads html files from a target directory
     type HtmlFile;
+    /// loads html files from a target directory
     fn load_html<'a>(&mut self, target: impl AsRef<camino::Utf8Path>) -> anyhow::Result<&'a [Self::HtmlFile]>;
 }
