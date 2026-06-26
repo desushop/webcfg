@@ -16,14 +16,15 @@ async fn main() -> anyhow::Result<()> {
 
 fn get_config() -> anyhow::Result<webcfg::Config> {
     let path = WORKING_DIR.join("cfg.toml");
-    match read_toml(&path).with_context(|| "ERR read toml") {
+    match read_toml(&path) {
         Ok(config) => Ok(config),
-        Err(re) => {
+        Err(e @ TomlError::Read(_, _)) => {
             let config = webcfg::Config::default();
             write_toml(config.clone(), &path)
                 .with_context(|| "ERR write toml")
-                .with_context(|| re)?;
+                .with_context(|| e)?;
             Ok(config)
         },
+        Err(e) => Err(e).with_context(|| "ERR read toml")
     }
 }
