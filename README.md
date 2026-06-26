@@ -16,6 +16,7 @@ a webserver which allows anyone with a steam account to create and upload a webs
 ## guidelines
 
 this project will follow test driven development.\
+tdd only applies to pub and pub(crate) function definitions.\
 in order to retain motivation and prevent burnout,
 the challenge is to write atleast one function with one test a day.\
 this includes rewriting and refactoring.
