@@ -1,3 +1,5 @@
+use anyhow::anyhow;
+
 use super::*;
 
 impl crate::WebcfgRunnable for axum::Router {
@@ -15,24 +17,13 @@ impl crate::WebcfgRunnable for axum::Router {
     }
 
     type HtmlFile = ();
-    fn load_html<'a>(&mut self, target: impl AsRef<camino::Utf8Path>) -> anyhow::Result<&'a [Self::HtmlFile]> {
-        let target = target.as_ref();
-        std::fs::read_dir(target)
-            .with_context(|| format!("ERR read directory {}", target))?
-            .filter_map(|r| match r {
-                Ok(d) => {
-                    if let Ok(path) = camino::Utf8PathBuf::from_path_buf(d.path()) {
-                        if let Ok(html) = compile_html::<Self::HtmlFile>(path) {
-                            return Some(html)
-                        } return None
-                    } return None
-                },
-                Err(e) => {
-                    self.throw_error(anyhow::anyhow!(e));
-                    return None
-                },
-            }); todo!("this fn is trash, do better and propagate")
-    } //TODO return iter
+    fn load_html(&mut self, directory: fs::ReadDir) -> impl Iterator<Item=Self::HtmlFile> {
+        directory
+            .filter_map(|r| drop_failures(self, r.with_context(|| "ERR read DirEntry")))
+            .filter(|d| d.path().extension() == )
+            .map(|d| compile_html(d.path()))
+            .filter_map(|r| drop_failures(self, r.with_context(|| "ERR compile html")))
+    }
 
     type Error = anyhow::Error;
     fn throw_error(&mut self, error: impl Into<Self::Error>) {
@@ -40,6 +31,13 @@ impl crate::WebcfgRunnable for axum::Router {
     }
 }
 
-fn compile_html<H>(path: impl AsRef<camino::Utf8Path>) -> anyhow::Result<H> {
+fn drop_failures<T>(router: &mut axum::Router, result: anyhow::Result<T>) -> Option<T> {
+    match result {
+        Err(e) => { router.throw_error(e); None }
+        Ok(d) => Some(d)
+    }
+}
+
+fn compile_html<H>(path: impl AsRef<std::path::Path>) -> anyhow::Result<H> {
     todo!() //TODO sanitize html
 }

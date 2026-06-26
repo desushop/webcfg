@@ -19,8 +19,10 @@ async fn test_serve() -> anyhow::Result<()> {
 #[tokio::test]
 async fn test_load_html() -> anyhow::Result<()> {
     let mut router = axum::Router::new();
-    let html = router.load_html(WORKING_DIR.deref().join("sites"))
-        .with_context(|| "ERR load html files")?;
+    let path = WORKING_DIR.deref().join("sites");
+    let dir = std::fs::read_dir(&path)
+        .with_context(|| format!("ERR read directory {}", &path))?;
+    let html = router.load_html(dir);
     Ok(())
 }
 
