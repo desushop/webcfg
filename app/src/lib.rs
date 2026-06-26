@@ -19,8 +19,9 @@
 
 pub use router::*;
 
-use std::ops::Deref;
+use std::{fs, net, ops::Deref};
 use anyhow::Context;
+use std::fmt::Debug;
 
 mod router;
 mod test;
@@ -37,11 +38,29 @@ pub struct App {
     error_bucket: Vec<anyhow::Error>
 }
 
-pub(crate) trait WebcfgRunnable {
+/// toml config which controls server parameters
+#[derive(Debug, serde::Serialize, serde::Deserialize, Eq, PartialEq, Clone)]
+pub struct Config {
+    ip: net::IpAddr,
+    port: u16,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            ip: net::IpAddr::V6(net::Ipv6Addr::LOCALHOST),
+            port: 35800,
+        }
+    }
+}
+
+pub trait WebcfgRunnable {
+    #[allow(async_fn_in_trait)]
     async fn serve<S>(self, socket: S) -> anyhow::Result<()>
     where for<'a> S: 'a + Send + Sync + tokio::net::ToSocketAddrs + std::fmt::Debug;
 
     /// loads html files from a target directory
     type HtmlFile;
+    /// loads html files from a target directory
     fn load_html<'a>(&mut self, target: impl AsRef<camino::Utf8Path>) -> anyhow::Result<&'a [Self::HtmlFile]>;
 }
