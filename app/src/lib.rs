@@ -24,6 +24,7 @@ use anyhow::Context;
 use std::fmt::Debug;
 
 mod router;
+#[cfg(test)]
 mod test;
 
 pub static WORKING_DIR: std::sync::LazyLock<camino::Utf8PathBuf> = std::sync::LazyLock::new(|| {

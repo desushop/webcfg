@@ -23,3 +23,19 @@ async fn test_load_html() -> anyhow::Result<()> {
         .with_context(|| "ERR load html files");
     Ok(())
 }
+
+#[test]
+fn test_write_toml() -> anyhow::Result<()> {
+    let path = WORKING_DIR.join("cfg.toml");
+    let out = write_toml(Config::default(), &path).with_context(|| "ERR write toml")?;
+    anyhow::ensure!(path.as_path() == out.as_ref(), "paths did not match");
+    Ok(())
+}
+
+#[test]
+fn test_read_toml() -> anyhow::Result<()> {
+    let config = Config::default();
+    let out = read_toml(WORKING_DIR.join("cfg.toml")).with_context(|| "ERR read toml")?;
+    anyhow::ensure!(config == out, "configs did not match");
+    Ok(())
+}
