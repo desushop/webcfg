@@ -16,7 +16,8 @@ fn main() {
         Some("build") => run_build(&mut sh),
         Some("move") => run_move(&mut sh),
         Some("test") => run_test(&mut sh, std::env::args().nth(2).is_some()),
-        _ => println!("commands:\n- dependencies\n- build\n- move\n- test"),
+        Some("exec") => run_exec(&mut sh, ),
+        _ => println!("commands:\n- dependencies\n- build\n- move\n- test\n- exec"),
     }
 }
 
@@ -32,6 +33,10 @@ fn run_move(sh: &mut xshell::Shell) {
         sh.current_dir().join(format!(".output/release/{BIN}")),
         sh.current_dir().join(".build/")
     ).unwrap();
+}
+
+fn run_exec(sh: &mut xshell::Shell) {
+    cmd!(sh, "./.build/{BIN}").run().unwrap()
 }
 
 fn run_test(sh: &mut xshell::Shell, verbose: bool) {
