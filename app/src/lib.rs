@@ -63,6 +63,9 @@ pub trait WebcfgRunnable {
     type HtmlFile;
     /// loads html files from a target directory
     fn load_html<'a>(&mut self, target: impl AsRef<camino::Utf8Path>) -> anyhow::Result<&'a [Self::HtmlFile]>;
+
+    type Error;
+    fn throw_error(&mut self, error: impl Into<Self::   Error>);
 }
 
 pub fn read_toml(target: impl AsRef<camino::Utf8Path>) -> anyhow::Result<Config> {
