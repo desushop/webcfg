@@ -64,3 +64,20 @@ pub trait WebcfgRunnable {
     /// loads html files from a target directory
     fn load_html<'a>(&mut self, target: impl AsRef<camino::Utf8Path>) -> anyhow::Result<&'a [Self::HtmlFile]>;
 }
+
+pub fn read_toml(target: impl AsRef<camino::Utf8Path>) -> anyhow::Result<Config> {
+    let target = target.as_ref();
+    let bytes = std::fs::read(target)
+        .with_context(|| format!("ERR read file \"{}\"", &target))?;
+    toml::from_slice(bytes.as_slice())
+        .with_context(|| format!("ERR deserialize toml \"{}\"", &target))
+}
+
+pub fn write_toml<C>(contents: C, target: impl AsRef<camino::Utf8Path>) -> anyhow::Result<impl AsRef<camino::Utf8Path>>
+where for<'a> C: 'a + serde::Serialize + Debug {
+    let bytes = toml::to_string_pretty(&contents)
+        .with_context(|| format!("ERR serialize toml \"{contents:?}\""))?;
+    fs::write(&target.as_ref(), bytes)
+        .with_context(|| format!("ERR write file \"{}\"", &target.as_ref()))
+        .map(|_| target)
+}
