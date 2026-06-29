@@ -23,6 +23,7 @@ async fn test_load_html() -> anyhow::Result<()> {
     let dir = std::fs::read_dir(&path)
         .with_context(|| format!("ERR read directory {}", &path))?;
     let html = router.load_html(dir);
+    let html = html.collect::<anyhow::Result<Vec<_>>>()?;
     Ok(())
 }
 

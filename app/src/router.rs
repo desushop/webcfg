@@ -17,24 +17,26 @@ impl crate::WebcfgRunnable for axum::Router {
     }
 
     type HtmlFile = ();
-    fn load_html(&mut self, directory: fs::ReadDir) -> impl Iterator<Item=Self::HtmlFile> {
-        directory
-            .filter_map(|r| drop_failures(self, r.with_context(|| "ERR read DirEntry")))
-            .filter(|d| d.path().extension() == )
-            .map(|d| compile_html(d.path()))
-            .filter_map(|r| drop_failures(self, r.with_context(|| "ERR compile html")))
+    fn load_html(&mut self, directory: fs::ReadDir) -> impl Iterator<Item=anyhow::Result<Self::HtmlFile>> {
+        directory.map(|r| {
+            match r.with_context(|| "ERR read DirEntry") {
+                Ok(d) => {
+                    let html_ext = std::ffi::OsStr::new("html");
+                    let path = d.path();
+                    match &path.extension() {
+                        Some(s @ html_ext) => return compile_html(&path).with_context(|| format!("ERR compile html \"{path:?}\"")),
+                        Some(_) => return anyhow::bail!("ERR file \"{path:?}\" is not an html file"),
+                        None => return anyhow::bail!("ERR path \"{path:?}\" is not a file"),
+                    }
+                },
+                Err(e) => return Err(e),
+            }
+        })
     }
 
     type Error = anyhow::Error;
     fn throw_error(&mut self, error: impl Into<Self::Error>) {
         todo!()
-    }
-}
-
-fn drop_failures<T>(router: &mut axum::Router, result: anyhow::Result<T>) -> Option<T> {
-    match result {
-        Err(e) => { router.throw_error(e); None }
-        Ok(d) => Some(d)
     }
 }
 

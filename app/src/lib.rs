@@ -64,7 +64,7 @@ pub trait WebcfgRunnable {
 
     type HtmlFile;
     /// loads html files from a target directory
-    fn load_html(&mut self, directory: fs::ReadDir) -> impl Iterator<Item=Self::HtmlFile>;
+    fn load_html(&mut self, directory: fs::ReadDir) -> impl Iterator<Item=anyhow::Result<Self::HtmlFile>>;
 
     type Error;
     fn throw_error(&mut self, error: impl Into<Self::Error>);
