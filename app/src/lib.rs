@@ -46,6 +46,7 @@ pub struct App {
 pub struct Config {
     ip: net::IpAddr,
     port: u16,
+    tags: Vec<String>
 }
 
 impl Default for Config {
@@ -53,6 +54,9 @@ impl Default for Config {
         Self {
             ip: net::IpAddr::V6(net::Ipv6Addr::LOCALHOST),
             port: 35800,
+            tags: vec![
+
+            ],
         }
     }
 }
@@ -64,7 +68,7 @@ pub trait WebcfgRunnable {
 
     type HtmlFile;
     /// loads html files from a target directory
-    fn load_html(&mut self, directory: fs::ReadDir) -> impl Iterator<Item=anyhow::Result<Self::HtmlFile>>;
+    fn load_html(&mut self, directory: fs::ReadDir, tags: &[impl std::borrow::Borrow<str>]) -> impl Iterator<Item=anyhow::Result<Self::HtmlFile>>;
 
     type Error;
     fn throw_error(&mut self, error: impl Into<Self::Error>);

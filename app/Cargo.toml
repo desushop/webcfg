@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+ammonia = "4.1.2"
 anyhow = { version = "1.0.102", features = []}
 axum = { version = "0.8.9", features = ["tokio", "json", "http2"]}
 camino = { version = "1.2.2", features = []}

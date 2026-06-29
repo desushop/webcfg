@@ -17,14 +17,14 @@ impl crate::WebcfgRunnable for axum::Router {
     }
 
     type HtmlFile = ();
-    fn load_html(&mut self, directory: fs::ReadDir) -> impl Iterator<Item=anyhow::Result<Self::HtmlFile>> {
+    fn load_html(&mut self, directory: fs::ReadDir, tags: &[impl std::borrow::Borrow<str>]) -> impl Iterator<Item=anyhow::Result<Self::HtmlFile>> {
         directory.map(|r| {
             match r.with_context(|| "ERR read DirEntry") {
                 Ok(d) => {
                     let html_ext = std::ffi::OsStr::new("html");
                     let path = d.path();
                     match &path.extension() {
-                        Some(s @ html_ext) => return compile_html(&path).with_context(|| format!("ERR compile html \"{path:?}\"")),
+                        Some(s @ html_ext) => return compile_html(&path, tags).with_context(|| format!("ERR compile html \"{path:?}\"")),
                         Some(_) => return anyhow::bail!("ERR file \"{path:?}\" is not an html file"),
                         None => return anyhow::bail!("ERR path \"{path:?}\" is not a file"),
                     }
@@ -40,6 +40,10 @@ impl crate::WebcfgRunnable for axum::Router {
     }
 }
 
-fn compile_html<H>(path: impl AsRef<std::path::Path>) -> anyhow::Result<H> {
-    todo!() //TODO sanitize html
+fn compile_html<H>(path: impl AsRef<std::path::Path>, tags: &[impl std::borrow::Borrow<str>]) -> anyhow::Result<H> {
+    let html = fs::read_to_string(path)
+        .with_context(|| format!("ERR read file to string"))?;
+    ammonia::Builder::empty()
+        .add_tags(tags);
+    todo!()
 }
