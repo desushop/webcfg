@@ -11,3 +11,13 @@ pub enum TomlError {
     #[error("ERR serialize toml \"{0}\"{1}")]
     Serialize(camino::Utf8PathBuf, String),
 }
+
+#[derive(thiserror::Error, Debug)]
+pub enum HtmlIndexError {
+    #[error("ERR read DirEntry: {0}")]
+    ReadEntry(String),
+    #[error("ERR path \"{0}\" is not html file")]
+    NotHtml(camino::Utf8PathBuf),
+    #[error("ERR path \"{0}\" is not a file")]
+    NotFile(camino::Utf8PathBuf),
+}

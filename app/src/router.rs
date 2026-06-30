@@ -16,20 +16,22 @@ impl crate::WebcfgRunnable for axum::Router {
         }); Ok(())
     }
 
-    type HtmlFile = ();
-    fn load_html(&mut self, directory: fs::ReadDir, tags: &[impl std::borrow::Borrow<str>]) -> impl Iterator<Item=anyhow::Result<Self::HtmlFile>> {
+    fn index_html(&mut self, directory: camino::ReadDirUtf8) -> impl Iterator<Item=Result<camino::Utf8PathBuf, err::HtmlIndexError>> {
         directory.map(|r| {
-            match r.with_context(|| "ERR read DirEntry") {
+            match r {
                 Ok(d) => {
-                    let html_ext = std::ffi::OsStr::new("html");
-                    let path = d.path();
-                    match &path.extension() {
-                        Some(s @ html_ext) => return compile_html(&path, tags).with_context(|| format!("ERR compile html \"{path:?}\"")),
-                        Some(_) => return anyhow::bail!("ERR file \"{path:?}\" is not an html file"),
-                        None => return anyhow::bail!("ERR path \"{path:?}\" is not a file"),
+                    let path = d.path().to_owned();
+
+                    if path.is_dir() {
+                        return Err(err::HtmlIndexError::NotFile(path))
+                    }
+
+                    match path.extension() {
+                        Some(s @ "html") => return Ok(path),
+                        _ => return Err(err::HtmlIndexError::NotHtml(path)),
                     }
                 },
-                Err(e) => return Err(e),
+                Err(e) => return Err(err::HtmlIndexError::ReadEntry(e.to_string())),
             }
         })
     }
@@ -40,7 +42,8 @@ impl crate::WebcfgRunnable for axum::Router {
     }
 }
 
-fn compile_html<H>(path: impl AsRef<std::path::Path>, tags: &[impl std::borrow::Borrow<str>]) -> anyhow::Result<H> {
+type HtmlFile = ();
+fn compile_html(path: impl AsRef<std::path::Path>, tags: &[impl std::borrow::Borrow<str>]) -> anyhow::Result<HtmlFile> {
     let html = fs::read_to_string(path)
         .with_context(|| format!("ERR read file to string"))?;
     ammonia::Builder::empty()

@@ -66,9 +66,7 @@ pub trait WebcfgRunnable {
     async fn serve<S>(self, socket: S) -> anyhow::Result<()>
     where for<'a> S: 'a + Send + Sync + tokio::net::ToSocketAddrs + std::fmt::Debug;
 
-    type HtmlFile;
-    /// loads html files from a target directory
-    fn load_html(&mut self, directory: fs::ReadDir, tags: &[impl std::borrow::Borrow<str>]) -> impl Iterator<Item=anyhow::Result<Self::HtmlFile>>;
+    fn index_html(&mut self, directory: camino::ReadDirUtf8) -> impl Iterator<Item=Result<camino::Utf8PathBuf, err::HtmlIndexError>>;
 
     type Error;
     fn throw_error(&mut self, error: impl Into<Self::Error>);
