@@ -15,31 +15,6 @@ impl crate::WebcfgRunnable for axum::Router {
                 .unwrap()
         }); Ok(())
     }
-
-    fn index_html(&mut self, directory: camino::ReadDirUtf8) -> impl Iterator<Item=Result<camino::Utf8PathBuf, err::HtmlIndexError>> {
-        directory.map(|r| {
-            match r {
-                Ok(d) => {
-                    let path = d.path().to_owned();
-
-                    if path.is_dir() {
-                        return Err(err::HtmlIndexError::NotFile(path))
-                    }
-
-                    match path.extension() {
-                        Some(s @ "html") => return Ok(path),
-                        _ => return Err(err::HtmlIndexError::NotHtml(path)),
-                    }
-                },
-                Err(e) => return Err(err::HtmlIndexError::ReadEntry(e.to_string())),
-            }
-        })
-    }
-
-    type Error = anyhow::Error;
-    fn throw_error(&mut self, error: impl Into<Self::Error>) {
-        todo!()
-    }
 }
 
 type HtmlFile = ();

@@ -18,14 +18,16 @@
 //! © single license - AGPL-3.0 - maoperson@desushop
 
 pub use router::*;
+pub use index::*;
 pub use err::*;
 
-use std::{fs, net, ops::Deref};
+use std::{fs, net, ops::Deref, sync};
 use anyhow::Context;
 use std::fmt::Debug;
 
 mod err;
 mod router;
+mod index;
 #[cfg(test)]
 mod test;
 
@@ -36,9 +38,17 @@ pub static WORKING_DIR: std::sync::LazyLock<camino::Utf8PathBuf> = std::sync::La
 });
 
 /// axum app state
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct App {
-    error_bucket: Vec<anyhow::Error>
+    html_index: ahash::HashMap<String, Site<HtmlIndexError>>
+}
+
+impl App {
+    pub fn new(iter: impl Iterator<Item=(String, Site<HtmlIndexError>)>) -> Self {
+        Self {
+            html_index: iter.collect()
+        }
+    }
 }
 
 /// toml config which controls server parameters
@@ -65,11 +75,6 @@ pub trait WebcfgRunnable {
     #[allow(async_fn_in_trait)]
     async fn serve<S>(self, socket: S) -> anyhow::Result<()>
     where for<'a> S: 'a + Send + Sync + tokio::net::ToSocketAddrs + std::fmt::Debug;
-
-    fn index_html(&mut self, directory: camino::ReadDirUtf8) -> impl Iterator<Item=Result<camino::Utf8PathBuf, err::HtmlIndexError>>;
-
-    type Error;
-    fn throw_error(&mut self, error: impl Into<Self::Error>);
 }
 
 pub fn read_toml(target: impl AsRef<camino::Utf8Path>) -> Result<Config, err::TomlError> {

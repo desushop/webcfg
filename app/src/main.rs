@@ -4,6 +4,7 @@
 
 use std::collections;
 use anyhow::Context;
+use axum::extract::State;
 use webcfg::*;
 
 #[tokio::main]
@@ -11,18 +12,11 @@ async fn main() -> anyhow::Result<()> {
     let config = get_config().with_context(|| "ERR get config")?;
     let ip = std::net::Ipv6Addr::LOCALHOST;
     let socket = std::net::SocketAddrV6::new(ip, 35800, 0, 0);
-    let mut router = axum::Router::new();
+    let mut router = axum::Router::<App>::new();
     let path = WORKING_DIR.join("sites");
-    let dir = path.read_dir_utf8().with_context(|| format!("ERR read directory {path}"))?;
-    let set = router.index_html(dir)
-        .filter_map(|e| match e {
-            Ok(p) => Some(p),
-            Err(e) => {
-                println!("{e:?}");
-                None
-            },
-        }).collect::<collections::HashSet<_>>();
-    router.serve(socket).await
+    let index = IndexBuilder::new(path).build().with_context(|| "ERR build html index")?;
+    let state = App::new(index);
+    router.with_state(state).serve(socket).await
 }
 
 fn get_config() -> anyhow::Result<webcfg::Config> {

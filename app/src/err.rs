@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(thiserror::Error, Debug)]
+#[derive(thiserror::Error, Debug, Clone)]
 pub enum TomlError {
     #[error("ERR read toml \"{0}\"{1}")]
     Read(camino::Utf8PathBuf, String),
@@ -12,7 +12,7 @@ pub enum TomlError {
     Serialize(camino::Utf8PathBuf, String),
 }
 
-#[derive(thiserror::Error, Debug)]
+#[derive(thiserror::Error, Debug, Clone)]
 pub enum HtmlIndexError {
     #[error("ERR read DirEntry: {0}")]
     ReadEntry(String),
