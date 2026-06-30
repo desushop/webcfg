@@ -27,11 +27,49 @@ async fn test_serve() -> anyhow::Result<()> {
 #[tokio::test]
 async fn test_load_html() -> anyhow::Result<()> {
     let mut router = axum::Router::new();
-    let path = WORKING_DIR.deref().join("sites");
-    let dir = std::fs::read_dir(&path)
-        .with_context(|| format!("ERR read directory {}", &path))?;
-    let html = router.load_html(dir, );
-    let html = html.collect::<anyhow::Result<Vec<_>>>()?;
+    let path = BUILD_DIR.deref().join("sites");
+    let dir = path.read_dir_utf8()
+        .with_context(|| format!("ERR read directory {path}"))?;
+    let dir2 = path.read_dir_utf8()
+        .with_context(|| format!("ERR read directory {path}"))?;
+    let mut failures = 0u16;
+    let mut failures2 = 0u16;
+    let mut directories = 0u16;
+    let mut directories2 = 0u16;
+    let mut misc_files = 0u16;
+    let mut misc_files2 = 0u16;
+    let mut successes = 0u16;
+    let mut successes2 = 0u16;
+    let entries = dir2.for_each(|e| {
+        match e {
+            Ok(e) => {
+                let p = e.into_path();
+                if p.is_dir() {
+                    directories += 1;
+                    return;
+                }
+                match p.extension() {
+                    Some(s @ "html") => successes += 1,
+                    _ => misc_files += 1,
+                } return;
+            },
+            Err(_) => failures += 1,
+        }
+    });
+
+    let html = router.index_html(dir).for_each(|e| {
+        match e {
+            Err(e @ err::HtmlIndexError::ReadEntry(..)) => failures2 += 1,
+            Err(e @ err::HtmlIndexError::NotFile(..)) => directories2 += 1,
+            Err(e @ err::HtmlIndexError::NotHtml(..)) => misc_files2 += 1,
+            Ok(_) => successes2 += 1,
+        }
+    });
+
+    assert!(failures2 == failures);
+    assert!(directories2 == directories);
+    assert!(misc_files == misc_files2);
+    assert!(successes == successes2);
     Ok(())
 }
 
