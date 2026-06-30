@@ -41,7 +41,7 @@ fn run_exec(sh: &mut xshell::Shell) {
 
 fn run_test(sh: &mut xshell::Shell, verbose: bool) {
     match verbose {
-        false => cmd!(sh, "cargo test -p webcfg").run().unwrap(),
+        false => cmd!(sh, "cargo test -p webcfg -- --test-threads=1").run().unwrap(),
         true => cmd!(sh, "cargo nextest run -rv -j 1 --nff --workspace --color always --cargo-quiet --cargo-message-format human --show-progress bar").run().unwrap(),
     }
 }
