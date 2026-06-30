@@ -83,6 +83,7 @@ fn test_write_toml() -> anyhow::Result<()> {
 
 #[test]
 fn test_read_toml() -> anyhow::Result<()> {
+    test_write_toml()?; //NOTE just stabilize like this; too lazy to fix test ordering
     let config = Config::default();
     let out = read_toml(BUILD_DIR.join("cfg.toml")).with_context(|| "ERR read toml")?;
     anyhow::ensure!(config == out, "configs did not match");
