@@ -1,7 +1,15 @@
+use std::str::FromStr;
+
 use super::*;
 
 static APP: std::sync::LazyLock<App> = std::sync::LazyLock::new(|| {
     Default::default()
+});
+static BUILD_DIR: std::sync::LazyLock<camino::Utf8PathBuf> = std::sync::LazyLock::new(|| {
+    camino::Utf8PathBuf::from_str(env!("CARGO_MANIFEST_DIR")).expect("ERR convert utf8 path")
+        .parent()
+        .unwrap()
+        .join(".build")
 });
 
 #[tokio::test]
@@ -29,7 +37,7 @@ async fn test_load_html() -> anyhow::Result<()> {
 
 #[test]
 fn test_write_toml() -> anyhow::Result<()> {
-    let path = WORKING_DIR.join("cfg.toml");
+    let path = BUILD_DIR.join("cfg.toml");
     let out = write_toml(Config::default(), &path).with_context(|| "ERR write toml")?;
     anyhow::ensure!(path.as_path() == out.as_ref(), "paths did not match");
     Ok(())
@@ -38,7 +46,7 @@ fn test_write_toml() -> anyhow::Result<()> {
 #[test]
 fn test_read_toml() -> anyhow::Result<()> {
     let config = Config::default();
-    let out = read_toml(WORKING_DIR.join("cfg.toml")).with_context(|| "ERR read toml")?;
+    let out = read_toml(BUILD_DIR.join("cfg.toml")).with_context(|| "ERR read toml")?;
     anyhow::ensure!(config == out, "configs did not match");
     Ok(())
 }
