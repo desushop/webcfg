@@ -7,12 +7,12 @@ pub enum Site<E> {
 }
 
 #[derive(Clone, Debug)]
-pub struct IndexBuilder {
-    dir: camino::Utf8PathBuf
+pub struct IndexBuilder<'a> {
+    dir: &'a camino::Utf8Path
 }
 
-impl IndexBuilder {
-    pub fn new(dir: impl Into<camino::Utf8PathBuf>) -> Self {
+impl<'a> IndexBuilder<'a> {
+    pub fn new(dir: impl Into<&'a camino::Utf8Path>) -> Self {
         Self {
             dir: dir.into()
         }

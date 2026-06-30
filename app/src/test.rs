@@ -53,7 +53,7 @@ async fn test_index_html() -> anyhow::Result<()> {
             Err(_) => failures += 1,
         }
     });
-    IndexBuilder::new(path).build()
+    IndexBuilder::new(path.as_path()).build()
         .with_context(|| "ERR build html index")?
         .for_each(|(_, site)| {
             if let Site::Err(e) = site {

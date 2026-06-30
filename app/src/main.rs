@@ -14,8 +14,8 @@ async fn main() -> anyhow::Result<()> {
     let socket = std::net::SocketAddrV6::new(ip, 35800, 0, 0);
     let mut router = axum::Router::<App>::new();
     let path = WORKING_DIR.join("sites");
-    let index = IndexBuilder::new(path).build().with_context(|| "ERR build html index")?;
-    let state = App::new(index);
+    let index = IndexBuilder::new(path.as_path()).build().with_context(|| "ERR build html index")?;
+    let state = App::new(index.map(|(n, s)| { println!("{s:?}"); (n,s) }));
     router.with_state(state).serve(socket).await
 }
 
