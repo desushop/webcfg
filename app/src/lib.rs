@@ -21,7 +21,7 @@ pub use router::*;
 pub use index::*;
 pub use err::*;
 
-use std::{fs, net, ops::Deref, sync};
+use std::{collections, fs, net, ops::Deref, sync};
 use anyhow::Context;
 use std::fmt::Debug;
 
@@ -56,17 +56,32 @@ impl App {
 pub struct Config {
     ip: net::IpAddr,
     port: u16,
-    tags: Vec<String>
+    tags: ahash::HashSet<String>,
+    attr: ahash::HashMap<String, ahash::HashSet<String>>
 }
 
 impl Default for Config {
     fn default() -> Self {
+        let default_tags = &[
+            "class", "draggable", "dir", "title", "role",
+            "aria-checked", "aria-autocomplete", "aria-disabled", "aria-label", "aria-valuemax", "aria-valuemin", "aria-valuenow", "aria-valuetext", "aria-placeholder",
+            "aria-dropeffect", "aria-dragged",
+            "aria-busy", "aria-description", "aria-details", "aria-label", "aria-keyshortcuts"];
         Self {
             ip: net::IpAddr::V6(net::Ipv6Addr::LOCALHOST),
             port: 35800,
-            tags: vec![
-
-            ],
+            tags: ahash::HashSet::from_iter([
+                "div", "span", "style", "a", "body", "button", "br", "code", "details", "head", "footer", "html", "img", "input", "i", "p", "svg", "textarea", "title", "option"
+            ].into_iter().map(String::from)),
+            attr: ahash::HashMap::from_iter([
+                ("img".to_owned(), ahash::HashSet::from_iter(["src", "href", "alt"].into_iter().chain(default_tags.clone()).map(String::from))),
+                ("input".to_owned(), ahash::HashSet::from_iter(["alt", "placeholder", "readonly", "required", "list", "disabled"].into_iter().chain(default_tags.clone()).map(String::from))),
+                ("html".to_owned(), ahash::HashSet::from_iter(["lang"].into_iter().map(String::from))),
+                ("a".to_owned(), ahash::HashSet::from_iter(["href"].into_iter().map(String::from))),
+                ("textarea".to_owned(), ahash::HashSet::from_iter(["wrap", "rows", "required", "readonly", "placeholder", "disabled"].into_iter().chain(default_tags.clone()).map(String::from))),
+                ("button".to_owned(), ahash::HashSet::from_iter(["disabled"].into_iter().chain(default_tags.clone()).map(String::from))),
+                ("option".to_owned(), ahash::HashSet::from_iter(["disabled"].into_iter().map(String::from))),
+            ].into_iter())
         }
     }
 }
