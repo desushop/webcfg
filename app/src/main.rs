@@ -19,6 +19,23 @@ async fn main() -> anyhow::Result<()> {
     router.with_state(state).serve(socket).await
 }
 
+async fn handle_action() {
+    todo!()
+}
+
+async fn serve_landing(State(app): State<sync::Arc<App>>) -> Result<response::Html<String>, (http::StatusCode, response::Html<String>)> {
+    app.landing.get_or_try_init(|| {
+        let p = WORKING_DIR.join("index.html");
+        fs::read_to_string(p)
+            .with_context(|| "ERR read index.html to string")
+            .map(|s| response::Html::from(s))
+    }).map(|h| h.clone()).map_err(|e| (http::StatusCode::INTERNAL_SERVER_ERROR, response::Html::from(format!("<html><p>{e:?}</p></html>"))))
+}
+
+async fn serve_site(State(app): State<sync::Arc<App>>, Path(site): Path<String>) -> Result<response::Html<String>, (http::StatusCode, response::Html<String>)> {
+    todo!()
+}
+
 fn get_config() -> anyhow::Result<webcfg::Config> {
     let path = WORKING_DIR.join("cfg.toml");
     match read_toml(&path) {

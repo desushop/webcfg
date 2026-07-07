@@ -2,13 +2,12 @@ use anyhow::anyhow;
 
 use super::*;
 
-impl crate::WebcfgRunnable for axum::Router {
-    async fn serve<S>(self, socket: S) -> anyhow::Result<()>
-    where for<'a> S: 'a + Send + Sync + tokio::net::ToSocketAddrs + std::fmt::Debug {
+impl<S> crate::WebcfgRunnable for axum::Router<S> {
+    async fn serve(router: axum::Router, socket: impl tokio::net::ToSocketAddrs + std::fmt::Debug) -> anyhow::Result<()> {
         let listener = tokio::net::TcpListener::bind(&socket).await
             .with_context(|| format!("ERR create socket from {socket:?}"))?;
         tokio::spawn(async move {
-            axum::serve(listener, self)
+            axum::serve(listener, router)
                 //.with_graceful_shutdown(signal) // TODO handle intentional shutdowns to prevent panics
                 .await
                 .with_context(|| "ERR start axum server")

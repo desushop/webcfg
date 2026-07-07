@@ -16,7 +16,7 @@ static BUILD_DIR: std::sync::LazyLock<camino::Utf8PathBuf> = std::sync::LazyLock
 async fn test_serve() -> anyhow::Result<()> {
     let mut router = axum::Router::new();
     let addr = std::net::SocketAddrV6::new(std::net::Ipv6Addr::LOCALHOST, 35800, 0, 0);
-    router.serve(addr).await
+    axum::Router::<sync::Arc<App>>::serve(router, addr).await
         .with_context(|| "ERR execute serve()");
     let req = reqwest::get(format!("http://[{}]:{}", addr.ip(), addr.port())).await
         .with_context(|| "ERR fetch request")?;
