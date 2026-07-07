@@ -2,8 +2,9 @@ use super::*;
 
 #[derive(Clone, Debug)]
 pub enum Site<E> {
+    Html(String),
     Path(camino::Utf8PathBuf),
-    Err(E)
+    Err(E),
 }
 
 #[derive(Clone, Debug)]
