@@ -89,8 +89,7 @@ impl Default for Config {
 
 pub trait WebcfgRunnable {
     #[allow(async_fn_in_trait)]
-    async fn serve<S>(self, socket: S) -> anyhow::Result<()>
-    where for<'a> S: 'a + Send + Sync + tokio::net::ToSocketAddrs + std::fmt::Debug;
+    async fn serve(router: axum::Router, socket: impl tokio::net::ToSocketAddrs + std::fmt::Debug) -> anyhow::Result<()>;
 }
 
 pub fn read_toml(target: impl AsRef<camino::Utf8Path>) -> Result<Config, err::TomlError> {
