@@ -21,7 +21,7 @@ pub use router::*;
 pub use index::*;
 pub use err::*;
 
-use std::{collections, fs, net, ops::Deref, sync};
+use std::{collections::{self, HashMap, HashSet}, fs, net, ops::Deref, sync};
 use anyhow::Context;
 use std::fmt::Debug;
 
@@ -40,7 +40,7 @@ pub static WORKING_DIR: std::sync::LazyLock<camino::Utf8PathBuf> = std::sync::La
 /// axum app state
 #[derive(Debug, Default, Clone)]
 pub struct App {
-    html_index: ahash::HashMap<String, Site<HtmlIndexError>>
+    html_index: HashMap<String, Site<HtmlIndexError>>
 }
 
 impl App {
