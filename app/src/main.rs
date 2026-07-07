@@ -16,7 +16,8 @@ async fn main() -> anyhow::Result<()> {
     let path = WORKING_DIR.join("sites");
     let index = IndexBuilder::new(path.as_path()).build().with_context(|| "ERR build html index")?;
     let state = App::new(index.map(|(n, s)| { println!("{s:?}"); (n,s) }));
-    router.with_state(state).serve(socket).await
+    axum::Router::<App>::serve(router.with_state(state), socket).await.with_context(|| "ERR serve axum")?;
+    loop {}
 }
 
 //TODO handle site loading errors dynamically, by compiling error htmls from templates of dylib via askama
