@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{default, str::FromStr};
 
 use super::*;
 
@@ -88,5 +88,15 @@ fn test_read_toml() -> anyhow::Result<()> {
     let config = Config::default();
     let out = read_toml(BUILD_DIR.join("cfg.toml")).with_context(|| "ERR read toml")?;
     anyhow::ensure!(config == out, "configs did not match");
+    Ok(())
+}
+
+#[test]
+fn test_sanitize_html() -> anyhow::Result<()> {
+    let cfg = Config::default();
+    let _in = "<html><link src=\"./index.css\"/><script><test/></script><style>* { opacity: 0.0; }</style></html>".to_owned();
+    let out = sanitize_html(&_in, cfg.tags, cfg.attr);
+    anyhow::ensure!(_in != out, "html did not sanitize");
+    anyhow::ensure!(out == "<html><style>* { opacity: 0.0; }</style></html>".to_owned(), "html did not sanitize correctly");
     Ok(())
 }

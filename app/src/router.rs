@@ -16,11 +16,17 @@ impl<S> crate::WebcfgRunnable for axum::Router<S> {
     }
 }
 
-type HtmlFile = ();
-fn compile_html(path: impl AsRef<std::path::Path>, tags: &[impl std::borrow::Borrow<str>]) -> anyhow::Result<HtmlFile> {
+pub fn sanitize_html(html: impl AsRef<str>, tags: HashSet<String>, attr: HashMap<String, HashSet<String>>) -> String {
+    ammonia::Builder::empty()
+        .tags(tags.iter().map(|s| s.as_str()).collect())
+        .tag_attributes(attr.iter().map(|(s, e)| (s.as_str(), e.into_iter().map(|s| s.as_str()).collect())).collect())
+        .clean(html.as_ref())
+        .to_string()
+}
+
+type HtmlFile = String;
+fn compile_html(path: impl AsRef<std::path::Path>, tags: HashSet<String>, attr: HashMap<String, HashSet<String>>) -> anyhow::Result<HtmlFile> {
     let html = fs::read_to_string(path)
         .with_context(|| format!("ERR read file to string"))?;
-    ammonia::Builder::empty()
-        .add_tags(tags);
-    todo!()
+    Ok(sanitize_html(html, tags, attr))
 }
